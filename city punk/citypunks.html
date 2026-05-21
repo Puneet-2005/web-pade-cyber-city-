@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CityPunks — No Laws. No Limits.</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --red-deep: #1a0000;
+    --red-mid: #6b0a0a;
+    --red-bright: #c0150e;
+    --pink-hot: #e8165c;
+    --pink-glow: #ff2d78;
+    --white: #ffffff;
+    --off-white: #f5ede8;
+    --gold: #d4a847;
+    --text-muted: rgba(255,220,210,0.55);
+    --nav-link: rgba(255,230,220,0.75);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    font-family: 'Barlow', sans-serif;
+    background: #0e0000;
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* layered background */
+  .bg-base {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 90% at 65% 40%, #8c1010 0%, #4a0808 35%, #1a0202 65%, #090000 100%);
+    z-index: 0;
+  }
+
+  /* vignette overlay */
+  .bg-vignette {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 40% 60% at 0% 50%, rgba(0,0,0,0.7) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 50% at 100% 50%, rgba(0,0,0,0.5) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 20% at 50% 100%, rgba(0,0,0,0.8) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 15% at 50% 0%, rgba(0,0,0,0.6) 0%, transparent 50%);
+    z-index: 1;
+  }
+
+  /* grain texture */
+  .bg-grain {
+    position: absolute; inset: 0;
+    z-index: 2;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
+
+  /* character image */
+  .character-wrap {
+    position: absolute;
+    right: 5%;
+    bottom: 0;
+    height: 95%;
+    z-index: 3;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .character-img {
+    height: 100%;
+    max-height: 860px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(-20px 0 60px rgba(180,20,20,0.5));
+    animation: floatChar 6s ease-in-out infinite;
+  }
+
+  /* SVG placeholder character (samurai silhouette) */
+  .char-svg {
+    height: 100%;
+    max-height: 860px;
+    width: auto;
+    animation: floatChar 6s ease-in-out infinite;
+    filter: drop-shadow(-20px 0 80px rgba(200,10,10,0.6));
+  }
+
+  @keyframes floatChar {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  /* floating debris particles */
+  .debris {
+    position: absolute;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  .debris span {
+    position: absolute;
+    background: rgba(255,180,150,0.7);
+    border-radius: 1px;
+    animation: drift linear infinite;
+  }
+
+  @keyframes drift {
+    0%   { transform: translate(0,0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.8; }
+    90%  { opacity: 0.4; }
+    100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity: 0; }
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    padding: 22px 40px;
+    gap: 0;
+  }
+
+  .logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    color: var(--white);
+    text-transform: uppercase;
+    border: 2.5px solid var(--white);
+    padding: 4px 10px 3px;
+    line-height: 1;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .logo .city { color: var(--white); }
+  .logo .punks {
+    color: var(--white);
+    background: var(--white);
+    color: #1a0000;
+    padding: 1px 5px;
+    margin-left: 2px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+    margin-left: 48px;
+  }
+
+  .nav-links a {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--nav-link);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+
+  .nav-cta {
+    margin-left: auto;
+  }
+
+  .btn-play {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--pink-hot);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 10px 22px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  .btn-play:hover { background: var(--pink-glow); transform: translateY(-1px); }
+  .btn-play:active { transform: scale(0.97); }
+
+  .btn-play .play-icon {
+    width: 0; height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid white;
+    flex-shrink: 0;
+  }
+
+  /* ─── HERO CONTENT ─── */
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    margin-top: auto;
+    padding: 0 48px 60px;
+    max-width: 600px;
+    animation: fadeUp 1s ease both;
+    animation-delay: 0.2s;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .eyebrow-line {
+    width: 32px;
+    height: 2px;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .eyebrow-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(72px, 9vw, 118px);
+    font-weight: 900;
+    line-height: 0.9;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    color: var(--white);
+    margin-bottom: 24px;
+    text-shadow: 0 0 80px rgba(220,30,30,0.3);
+  }
+
+  .hero-desc {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 360px;
+    margin-bottom: 36px;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .btn-play-free {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--pink-hot);
+    color: var(--white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 13px 26px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.1s;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  .btn-play-free:hover { background: var(--pink-glow); transform: translateY(-2px); }
+  .btn-play-free:active { transform: scale(0.97); }
+
+  .btn-trailer {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--off-white);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    transition: color 0.2s;
+  }
+
+  .btn-trailer:hover { color: var(--white); }
+  .btn-trailer:hover .trailer-circle { border-color: var(--white); }
+
+  .trailer-circle {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,230,220,0.5);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .trailer-circle .play-icon {
+    width: 0; height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 9px solid var(--off-white);
+    margin-left: 2px;
+  }
+
+  /* ─── BOTTOM RIGHT RATING ─── */
+  .rating-bar {
+    position: absolute;
+    bottom: 62px;
+    right: 48px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: fadeUp 1s ease both;
+    animation-delay: 0.5s;
+  }
+
+  .rating-dividers {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .rating-dividers span {
+    width: 2px; height: 14px;
+    background: rgba(255,200,190,0.3);
+    display: block;
+  }
+
+  .rating-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,200,180,0.4);
+  }
+
+  .stars {
+    color: var(--gold);
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .rating-score {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  /* ─── SCAN LINE EFFECT ─── */
+  .scanlines {
+    position: absolute; inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0,0,0,0.04) 3px,
+      rgba(0,0,0,0.04) 4px
+    );
+  }
+
+  /* ─── SCROLL INDICATOR ─── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.35;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.6; }
+  }
+
+  .scroll-hint span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--off-white);
+  }
+
+  .scroll-line {
+    width: 1px; height: 30px;
+    background: linear-gradient(to bottom, var(--off-white), transparent);
+    animation: scrollDown 1.5s ease-in-out infinite;
+  }
+
+  @keyframes scrollDown {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  /* ─── SECTIONS BELOW ─── */
+  .features {
+    background: #0a0000;
+    padding: 100px 48px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .feature-card {
+    background: rgba(255,255,255,0.03);
+    padding: 40px 32px;
+    border: 0.5px solid rgba(255,100,80,0.12);
+    transition: background 0.3s;
+    cursor: default;
+  }
+
+  .feature-card:hover {
+    background: rgba(255,255,255,0.06);
+  }
+
+  .feature-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--pink-hot);
+    line-height: 1;
+    margin-bottom: 12px;
+    opacity: 0.9;
+  }
+
+  .feature-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 10px;
+  }
+
+  .feature-desc {
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+
+  .section-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 900;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--white);
+    margin-bottom: 60px;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="bg-base"></div>
+  <div class="bg-vignette"></div>
+  <div class="bg-grain"></div>
+  <div class="scanlines"></div>
+
+  <!-- Debris particles -->
+  <div class="debris" id="debris"></div>
+
+  <!-- CHARACTER (SVG placeholder — swap for a real PNG) -->
+  <div class="character-wrap">
+    <svg class="char-svg" viewBox="0 0 420 900" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <defs>
+        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#c0150e" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#6b0a0a" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="coat" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#4a7060"/>
+          <stop offset="100%" stop-color="#2d4f3f"/>
+        </linearGradient>
+        <linearGradient id="pants" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#3a5a48"/>
+          <stop offset="100%" stop-color="#1e3028"/>
+        </linearGradient>
+        <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c4865e"/>
+          <stop offset="100%" stop-color="#a0633a"/>
+        </linearGradient>
+        <linearGradient id="blade" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#c8c8c8"/>
+          <stop offset="100%" stop-color="#606060"/>
+        </linearGradient>
+      </defs>
+
+      <!-- glow circle behind -->
+      <ellipse cx="210" cy="480" rx="200" ry="280" fill="url(#glow)"/>
+
+      <!-- SHADOW -->
+      <ellipse cx="210" cy="880" rx="100" ry="14" fill="rgba(0,0,0,0.5)"/>
+
+      <!-- LEGS / PANTS (baggy) -->
+      <path d="M155 600 Q140 680 130 760 Q125 800 132 840 Q138 870 155 872 Q170 874 178 860 Q184 840 186 800 Q188 760 192 730" fill="url(#pants)"/>
+      <path d="M265 600 Q280 680 290 760 Q295 800 288 840 Q282 870 265 872 Q250 874 242 860 Q236 840 234 800 Q232 760 228 730" fill="url(#pants)"/>
+      <!-- Pant patches -->
+      <rect x="133" y="780" width="40" height="28" rx="3" fill="#c0150e" opacity="0.7"/>
+      <rect x="248" y="810" width="30" height="20" rx="3" fill="#8b0a0a" opacity="0.5"/>
+
+      <!-- TORSO / COAT (open) -->
+      <path d="M150 350 Q130 380 118 450 Q110 510 115 580 Q118 610 130 620 Q160 630 210 628 Q260 630 290 620 Q302 610 305 580 Q310 510 302 450 Q290 380 270 350 Z" fill="url(#coat)"/>
+      <!-- Coat lapel left -->
+      <path d="M210 355 Q190 370 175 400 Q165 420 168 450 L210 440 Z" fill="#2d4f3f"/>
+      <!-- Coat lapel right -->
+      <path d="M210 355 Q230 370 245 400 Q255 420 252 450 L210 440 Z" fill="#2d4f3f"/>
+      <!-- Sash / belt -->
+      <rect x="130" y="540" width="160" height="22" rx="2" fill="#8b0a0a"/>
+      <rect x="195" y="536" width="30" height="30" rx="2" fill="#6b0808"/>
+
+      <!-- LEFT ARM (extended/reaching) -->
+      <path d="M150 360 Q110 390 85 430 Q70 460 82 490 Q90 510 110 505 Q130 498 145 470 Q158 445 165 410 Z" fill="url(#coat)"/>
+      <!-- LEFT HAND -->
+      <ellipse cx="82" cy="498" rx="16" ry="22" fill="url(#skin)" transform="rotate(-20 82 498)"/>
+      <!-- fingers -->
+      <path d="M68 488 Q56 480 52 470" stroke="#a0633a" stroke-width="6" stroke-linecap="round"/>
+      <path d="M66 495 Q52 492 46 485" stroke="#a0633a" stroke-width="6" stroke-linecap="round"/>
+      <path d="M68 505 Q54 506 50 500" stroke="#a0633a" stroke-width="5" stroke-linecap="round"/>
+
+      <!-- RIGHT ARM (down, holding sword) -->
+      <path d="M270 360 Q300 390 310 440 Q318 475 308 510 Q300 530 285 535 Q268 538 258 520 Q248 500 252 465 Q255 430 258 395 Z" fill="url(#coat)"/>
+
+      <!-- SWORD (katana) -->
+      <g transform="rotate(-35 290 540)">
+        <!-- scabbard -->
+        <rect x="280" y="530" width="14" height="220" rx="7" fill="#2a1a0a"/>
+        <rect x="282" y="535" width="10" height="8" rx="2" fill="#8b6a30"/>
+        <!-- blade -->
+        <path d="M287 290 Q284 350 285 520 L291 520 Q292 350 289 290 Z" fill="url(#blade)"/>
+        <!-- guard -->
+        <ellipse cx="288" cy="524" rx="18" ry="8" fill="#5a4020"/>
+        <!-- grip -->
+        <rect x="282" y="522" width="12" height="60" rx="6" fill="#3a2010"/>
+        <path d="M282 530 Q294 533 282 540 Q294 543 282 550 Q294 553 282 560 Q294 563 282 570" stroke="#8b6a30" stroke-width="2" fill="none"/>
+      </g>
+
+      <!-- NECK -->
+      <rect x="196" y="290" width="28" height="40" rx="6" fill="url(#skin)"/>
+
+      <!-- HEAD -->
+      <ellipse cx="210" cy="260" rx="52" ry="58" fill="url(#skin)"/>
+
+      <!-- HOOD / MASK top -->
+      <path d="M158 230 Q165 140 210 128 Q255 140 262 230 Q255 180 210 172 Q165 180 158 230 Z" fill="#1a1a1a"/>
+      <!-- Hood back drape -->
+      <path d="M160 240 Q155 290 160 340 Q165 360 175 355 Q165 320 168 280 Z" fill="#242424"/>
+      <path d="M260 240 Q265 290 260 340 Q255 360 245 355 Q255 320 252 280 Z" fill="#242424"/>
+
+      <!-- Face mask (lower face covered) -->
+      <path d="M170 270 Q172 310 210 318 Q248 310 250 270 Q240 285 210 288 Q180 285 170 270 Z" fill="#1a1a1a"/>
+
+      <!-- Eyes -->
+      <ellipse cx="193" cy="258" rx="10" ry="7" fill="#0a0a0a"/>
+      <ellipse cx="227" cy="258" rx="10" ry="7" fill="#0a0a0a"/>
+      <!-- Eye glint -->
+      <ellipse cx="197" cy="255" rx="3" ry="2" fill="rgba(255,60,60,0.9)"/>
+      <ellipse cx="231" cy="255" rx="3" ry="2" fill="rgba(255,60,60,0.9)"/>
+
+      <!-- Cloth ribbons floating -->
+      <path d="M85 435 Q60 415 42 400 Q30 390 35 380" stroke="#c0a060" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+      <path d="M85 450 Q55 440 38 430" stroke="#c0a060" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+
+      <!-- Shoes -->
+      <ellipse cx="148" cy="872" rx="28" ry="10" fill="#1a0f08"/>
+      <ellipse cx="272" cy="872" rx="28" ry="10" fill="#1a0f08"/>
+    </svg>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">
+      <span class="city">CTY</span><span class="punks">PUNKS</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#">Play</a></li>
+      <li><a href="#">Story</a></li>
+      <li><a href="#">World</a></li>
+      <li><a href="#">News</a></li>
+      <li><a href="#">Community</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="#" class="btn-play">
+        <span class="play-icon"></span>
+        Play Now
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO CONTENT -->
+  <div class="hero-content">
+    <div class="eyebrow">
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Open World Cyberpunk RPG &nbsp;·&nbsp; 2026</span>
+    </div>
+    <h1>No Laws.<br>No Limits.</h1>
+    <p class="hero-desc">12 districts. Infinite factions. One city that never sleeps — and never forgives. Your choices reshape everything.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn-play-free">
+        <span class="play-icon"></span>
+        Play Free Now
+      </a>
+      <button class="btn-trailer">
+        <span class="trailer-circle"><span class="play-icon"></span></span>
+        Watch the Trailer
+      </button>
+    </div>
+  </div>
+
+  <!-- RATING -->
+  <div class="rating-bar">
+    <div class="rating-dividers">
+      <span></span><span></span><span></span>
+    </div>
+    <span class="rating-label">App Store</span>
+    <span class="stars">★★★★★</span>
+    <span class="rating-score">9.4 / 10</span>
+  </div>
+
+  <!-- SCROLL HINT -->
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="features">
+  <p class="section-label">Why Play</p>
+  <h2 class="section-title">Choose Your Path</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-num">12</div>
+      <div class="feature-title">Districts</div>
+      <div class="feature-desc">Explore a sprawling open world packed with rival factions, underground markets, and hidden lore.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">∞</div>
+      <div class="feature-title">Factions</div>
+      <div class="feature-desc">Align with syndicates, go rogue, or play all sides. Every relationship shifts the city's balance.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">4K</div>
+      <div class="feature-title">Ultra Graphics</div>
+      <div class="feature-desc">Ray-traced neon reflections, volumetric fog, and hand-crafted environments with no loading screens.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">Co-op</div>
+      <div class="feature-title">Multiplayer</div>
+      <div class="feature-desc">Team up or betray. Cross-platform co-op with up to 4 players in every mission and open world event.</div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Generate floating debris particles
+  const debrisEl = document.getElementById('debris');
+  for (let i = 0; i < 18; i++) {
+    const s = document.createElement('span');
+    const size = Math.random() * 6 + 2;
+    const x = Math.random() * 100;
+    const y = Math.random() * 100;
+    const dur = Math.random() * 12 + 8;
+    const delay = Math.random() * -15;
+    const tx = (Math.random() - 0.5) * 200 + 'px';
+    const ty = (Math.random() - 0.7) * 300 + 'px';
+    const rot = (Math.random() - 0.5) * 720 + 'deg';
+
+    s.style.cssText = `
+      width: ${size}px;
+      height: ${size * 0.4}px;
+      left: ${x}%;
+      top: ${y}%;
+      --tx: ${tx};
+      --ty: ${ty};
+      --rot: ${rot};
+      animation-duration: ${dur}s;
+      animation-delay: ${delay}s;
+      background: rgba(255,${150 + Math.random()*80},${100 + Math.random()*60},${0.4 + Math.random()*0.5});
+      border-radius: ${Math.random() > 0.5 ? '0' : '50%'};
+      transform: rotate(${Math.random()*360}deg);
+    `;
+    debrisEl.appendChild(s);
+  }
+</script>
+</body>
+</html>
