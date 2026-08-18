@@ -14,7 +14,7 @@ A visually immersive landing page featuring:
 - Responsive layout
 - Feature showcase section
 
-## Technologies Used
+## Technologies Used.
 
 - HTML5
 - CSS3
@@ -24,7 +24,7 @@ A visually immersive landing page featuring:
 
 ## Features
 
-### Hero Section
+### Hero Section.
 - Full-screen immersive cyberpunk background
 - Animated floating character
 - Neon glow visual effects
